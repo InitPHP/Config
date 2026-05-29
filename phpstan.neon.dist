@@ -1,0 +1,14 @@
+parameters:
+    level: 8
+    paths:
+        - src
+        - tests
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: true
+    ignoreErrors:
+        # Library::__get() provides dynamic, runtime-named properties that
+        # cannot be expressed with @property tags. The tests exercise that
+        # magic access on purpose.
+        -
+            message: '#Access to an undefined property InitPHP\\Config\\Library::#'
+            path: tests/LibraryTest.php

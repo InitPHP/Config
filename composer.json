@@ -4,11 +4,15 @@
     "type": "library",
     "license": "MIT",
     "keywords": [
+        "php",
         "config",
         "configuration",
+        "config-manager",
         "dot-notation",
-        "parameter-bag",
+        "dotted-path",
         "settings",
+        "parameter-bag",
+        "php-library",
         "initphp"
     ],
     "authors": [

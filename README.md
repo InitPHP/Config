@@ -1,209 +1,256 @@
 # InitPHP Config
 
-Advanced configuration manager library.
+Advanced configuration manager for PHP: a single configuration tree with
+dotted-path access, case-insensitive keys, and loaders for arrays, PHP
+files, whole directories and class/object properties — usable either as
+an injectable object or through a static facade.
 
-[![Latest Stable Version](http://poser.pugx.org/initphp/config/v)](https://packagist.org/packages/initphp/config) [![Total Downloads](http://poser.pugx.org/initphp/config/downloads)](https://packagist.org/packages/initphp/config) [![Latest Unstable Version](http://poser.pugx.org/initphp/config/v/unstable)](https://packagist.org/packages/initphp/config) [![License](http://poser.pugx.org/initphp/config/license)](https://packagist.org/packages/initphp/config) [![PHP Version Require](http://poser.pugx.org/initphp/config/require/php)](https://packagist.org/packages/initphp/config)
+[![CI](https://github.com/InitPHP/Config/actions/workflows/ci.yml/badge.svg)](https://github.com/InitPHP/Config/actions/workflows/ci.yml)
+[![Latest Stable Version](http://poser.pugx.org/initphp/config/v)](https://packagist.org/packages/initphp/config)
+[![Total Downloads](http://poser.pugx.org/initphp/config/downloads)](https://packagist.org/packages/initphp/config)
+[![License](http://poser.pugx.org/initphp/config/license)](https://packagist.org/packages/initphp/config)
+[![PHP Version Require](http://poser.pugx.org/initphp/config/require/php)](https://packagist.org/packages/initphp/config)
 
 ## Requirements
 
-- PHP 7.4 or higher
-- [ParameterBag Library](https://github.com/initphp/parameterbag)
+- PHP 8.1 or higher
+- [initphp/parameterbag](https://github.com/InitPHP/ParameterBag) `^2.0`
 
 ## Installation
 
-```php 
+```bash
 composer require initphp/config
 ```
 
-## Usage
+## Key Concepts
 
-### Config Classes
+- **Dotted paths** — `db.host` addresses `host` inside the `db` array. Keys
+  can be nested arbitrarily deep.
+- **Case-insensitive keys** — `DB.Host`, `db.host` and `Db.HOST` all refer
+  to the same entry. Keys are folded to lower-case internally.
+- **Three entry points** that all share the same read/write contract
+  ([`ConfigInterface`](src/Interfaces/ConfigInterface.php)):
+  - [`Classes`](src/Classes.php) — turn a class's public properties into configuration.
+  - [`Library`](src/Library.php) — an injectable object with the full loader API.
+  - [`Config`](src/Config.php) — a static facade over a shared `Library`.
 
-```php 
-class MyAppConfig extends \InitPHP\Config\Classes
+## Quick Start
+
+### Configuration classes
+
+Declare your configuration as public properties and read it through the
+shared API:
+
+```php
+use InitPHP\Config\Classes;
+
+final class MyAppConfig extends Classes
 {
-    public $url = 'http://lvh.me';
-    
-    public $name = 'LocalHost';
-    
-    public $db = [
-        'host'  => 'localhost',
-        'user'  => 'root'
-    ];
-    
-    // ...
-}
-```
+    public string $url  = 'http://lvh.me';
+    public string $name = 'LocalHost';
 
-```php 
+    /** @var array<string, string> */
+    public array $db = [
+        'host' => 'localhost',
+        'user' => 'root',
+    ];
+}
+
 $config = new MyAppConfig();
 
-echo $config->get('url'); 
-// Output : "http://lvh.me"
+$config->get('url');                 // "http://lvh.me"
+$config->get('db.host');             // "localhost"
+$config->get('details', 'Not Found'); // "Not Found"
 
-echo $config->get('details', 'Not Found'); 
-// Output : "Not Found"
-
-echo $config->get('db.host');
-// Output : "localhost"
-
-if($config->has('name')){
-    echo $config->get('name');
-    // Output : "LocalHost"
+if ($config->has('name')) {
+    $config->get('name');            // "LocalHost"
 }
 ```
 
-### Config Library
+### The `Library` object
 
-#### `Config::setClass()`
+```php
+use InitPHP\Config\Library;
 
-Lets you define properties of an object or class as a configuration.
+$config = new Library();
 
-```php 
+$config->set('site.url', 'http://lvh.me')
+       ->set('site.db.host', 'localhost');
+
+$config->get('site.url');     // "http://lvh.me"
+$config->get('SITE.DB.HOST'); // "localhost" (case-insensitive)
+```
+
+### The `Config` static facade
+
+Every call is forwarded to a lazily created, process-wide `Library`
+singleton:
+
+```php
+use InitPHP\Config\Config;
+
+Config::setArray('site', ['url' => 'http://lvh.me']);
+
+Config::get('site.url'); // "http://lvh.me"
+Config::has('site.url'); // true
+
+Config::reset(); // discard the shared instance (useful in tests)
+```
+
+## Reading and writing
+
+The following methods are available on `Classes`, `Library`, and the
+`Config` facade alike:
+
+| Method | Description |
+| ------ | ----------- |
+| `get(string $key, mixed $default = null): mixed` | Read a value, or `$default` when the key is absent. |
+| `set(string $key, mixed $value): self` | Write a value (intermediate arrays are created as needed). |
+| `has(string $key): bool` | Whether the key exists (a stored `null` still counts as present). |
+| `remove(string $key): self` | Remove a key (a no-op when it is absent). |
+| `all(): array` | The entire configuration tree as a plain array. |
+
+## Loaders (`Library` / `Config`)
+
+### `setArray()`
+
+```php
+public function setArray(?string $name, array $assoc = []): self;
+```
+
+Imports an associative array. When `$name` is `null` or `''` the array is
+**merged into the root**; otherwise it is stored under `$name`.
+
+```php
+Config::setArray('site', [
+    'url' => 'http://lvh.me',
+    'db'  => ['host' => 'localhost', 'user' => 'db_user'],
+]);
+
+Config::get('site.url');     // "http://lvh.me"
+Config::get('site.db.host'); // "localhost"
+```
+
+### `setFile()`
+
+```php
+public function setFile(?string $name, string $path): self;
+```
+
+Loads a PHP file that **returns** an associative array.
+
+```php
+// config/db.php
+return [
+    'HOST' => 'localhost',
+    'USER' => 'root',
+];
+```
+
+```php
+Config::setFile('db', __DIR__ . '/config/db.php');
+
+Config::get('db.host'); // "localhost"  (keys are case-insensitive)
+```
+
+### `setDir()`
+
+```php
+public function setDir(?string $name, string $path, array $exclude = []): self;
+```
+
+Loads every top-level `*.php` file in a directory. Each file is stored
+under a key derived from its base name; when `$name` is given it becomes a
+common prefix. Files can be skipped via `$exclude` (with or without the
+`.php` suffix).
+
+```php
+// config/db.php   -> returns ['HOST' => 'localhost']
+// config/site.php -> returns ['URL'  => 'http://lvh.me']
+
+Config::setDir('app', __DIR__ . '/config', ['secrets']);
+
+Config::get('app.db.host'); // "localhost"
+Config::get('app.site.url'); // "http://lvh.me"
+```
+
+### `setClass()`
+
+```php
 public function setClass(string|object $classOrObject): self;
 ```
 
-**_Example :_**
+Imports the **public** properties of a class or object under the class's
+short name. A class name imports the property *defaults*; an instance
+imports the *current* values.
 
-```php 
+```php
 namespace App\Config;
 
 class AppConfig
 {
-    public $url = 'http://lvh.me';
+    public string $url = 'http://lvh.me';
 }
 
-class Database 
+class Database
 {
-    public $host = 'localhost';
+    public string $host = 'localhost';
 }
 ```
 
-```php 
-use \InitPHP\Config\Config;
+```php
+Config::setClass(\App\Config\AppConfig::class); // by class name
+Config::setClass(new \App\Config\Database());   // by instance
 
-// Class
-Config::setClass(\App\Config\AppConfig::class);
-
-// or Object
-Config::setClass(new \App\Config\Database());
-
-Config::get('appconfig.url');
-
-Config::get('database.host');
+Config::get('appconfig.url'); // "http://lvh.me"
+Config::get('database.host'); // "localhost"
 ```
 
-#### `Config::setArray()`
+## Object-style access (`Library`)
 
-Imports an array.
+A `Library` exposes top-level entries as read-only nested objects:
 
-```php 
-public function setArray(?string $name, array $assoc = []): self;
+```php
+$config = new Library();
+$config->set('db.host', 'localhost')->set('db.user', 'root');
+
+$config->db->host; // "localhost"
+$config->db->user; // "root"
 ```
 
-**_Example :_** 
+## Error handling
 
-```php 
-require_once "vendor/autoload.php";
-use \InitPHP\Config\Config;
+Loader failures throw
+[`InitPHP\Config\Exceptions\ConfigException`](src/Exceptions/ConfigException.php)
+(a `RuntimeException`): missing files, files that do not return an array,
+invalid directories, and unknown class names.
 
-$configs = [
-    'url'   => 'http://lvh.me',
-    'db'    => [
-        'host'  => 'localhost',
-        'user'  => 'db_user',
-        'pass'  => '',
-        'name'  => 'database'
-    ],
-];
-Config::setArray('site', $configs);
+```php
+use InitPHP\Config\Exceptions\ConfigException;
 
-
-Config::get('site.url');
-Config::get('site.db.host', '127.0.0.1');
-Config::get('site.db.user', 'root');
+try {
+    Config::setFile('db', '/path/to/missing.php');
+} catch (ConfigException $e) {
+    // "Configuration file "/path/to/missing.php" was not found."
+}
 ```
 
-#### `Config::setFile()`
+## Documentation
 
-Loads the configurations in the PHP file, which returns an associative array.
+In-depth guides with runnable examples live in [`docs/`](docs/README.md).
 
-```php 
-public function setFile(?string $name, string $path): self;
+## Testing
+
+```bash
+composer test      # PHPUnit
+composer analyse   # PHPStan (level 8)
+composer cs:check  # PHP-CS-Fixer (dry-run)
 ```
 
-**_Example :_** 
+## Credits
 
-`public_html/db_config.php` :
-
-```php 
-<?php 
-return [
-    'HOST'  => 'localhost',
-    'USER'  => 'root',
-    'PASS'  => '',
-    'NAME'  => 'database'
-];
-```
-
-```php 
-require_once "vendor/autoload.php";
-use \InitPHP\Config\Config;
-
-Config::setFile('DB', __DIR__ . '/public_html/db_config.php');
-
-// Usage : 
-Config::get('db.host');
-```
-
-#### `Config::setDir()`
-
-Loads PHP files in a directory as configuration files.
-
-```php 
-public function setDir(?string $name, string $path, array $exclude = []): self;
-```
-
-**_Example :_** 
-
-`public_html/config/db.php` :
-
-```php 
-<?php 
-return [
-    'HOST'  => 'localhost',
-    'USER'  => 'root',
-    'PASS'  => '',
-    'NAME'  => 'database'
-];
-```
-
-`public_html/config/site.php` :
-
-```php 
-<?php 
-return [
-    'URL'   => 'http://lvh.me',
-    // ...
-];
-```
-
-
-```php 
-require_once "vendor/autoload.php";
-use \PHPConfig\Config;
-
-Config::setDir('app', __DIR__ . '/public_html/config/');
-
-// Usage : 
-Config::get('app.site.url');
-Config::get('app.db.host');
-```
-
-## Credit
-
-- [Muhammet ŞAFAK](https://www.muhammetsafak.com.tr) <<info@muhammetsafak.com.tr>>
+- [Muhammet ŞAFAK](https://www.muhammetsafak.com.tr) — <info@muhammetsafak.com.tr>
 
 ## License
 
-Copyright &copy; 2022 [MIT License](./LICENSE)
+Released under the [MIT License](LICENSE). Copyright &copy; InitPHP.

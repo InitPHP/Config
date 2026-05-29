@@ -1,85 +1,56 @@
 <?php
+
 /**
- * Classes.php
+ * This file is part of the initphp/config package.
  *
- * This file is part of InitPHP.
+ * (c) Muhammet ŞAFAK <info@muhammetsafak.com.tr>
  *
- * @author     Muhammet ŞAFAK <info@muhammetsafak.com.tr>
- * @copyright  Copyright © 2022 InitPHP
- * @license    http://initphp.github.io/license.txt  MIT
- * @version    1.0
- * @link       https://www.muhammetsafak.com.tr
+ * For the full copyright and license information, please view the
+ * LICENSE file that was distributed with this source code.
+ *
+ * @link https://github.com/InitPHP/Config
  */
 
 declare(strict_types=1);
 
 namespace InitPHP\Config;
 
-use \InitPHP\Config\Interfaces\ConfigInterface;
-use \InitPHP\ParameterBag\ParameterBag;
+use function get_class_vars;
 
-abstract class Classes implements ConfigInterface
+/**
+ * Base class that exposes a subclass's public properties as
+ * configuration values.
+ *
+ * Extend it, declare your configuration as public properties (scalars
+ * or nested arrays), and read them back through the {@see ConfigInterface}
+ * API:
+ *
+ * ```php
+ * final class AppConfig extends \InitPHP\Config\Classes
+ * {
+ *     public string $url = 'http://lvh.me';
+ *     public array  $db  = ['host' => 'localhost', 'user' => 'root'];
+ * }
+ *
+ * $config = new AppConfig();
+ * $config->get('url');     // "http://lvh.me"
+ * $config->get('db.host'); // "localhost"
+ * ```
+ *
+ * Only the property *default* values declared on the class are imported,
+ * and only those visible from this base class in the inheritance chain —
+ * i.e. public and protected properties, but not a subclass's private
+ * ones. The infrastructure property inherited from {@see AbstractConfig}
+ * is excluded so it never leaks into the configuration tree.
+ */
+abstract class Classes extends AbstractConfig
 {
-
-    protected ParameterBag $_ParameterBag;
-
     public function __construct()
     {
-        $data = get_class_vars(get_called_class());
-        $this->_ParameterBag = new ParameterBag($data, [
-            'isMulti'   => true,
-            'separator' => '.'
-        ]);
-    }
+        /** @var array<string, mixed> $data */
+        $data = get_class_vars(static::class);
+        unset($data['parameterBag']);
 
-    public function __destruct()
-    {
-        if(isset($this->_ParameterBag)){
-            $this->_ParameterBag->close();
-            unset($this->_ParameterBag);
-        }
+        $this->parameterBag = self::newParameterBag($data);
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function set(string $key, $value): self
-    {
-        $this->_ParameterBag->set($key, $value);
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function get(string $key, $default = null)
-    {
-        return $this->_ParameterBag->get($key, $default);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function has(string $key): bool
-    {
-        return $this->_ParameterBag->has($key);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function remove(string $key): self
-    {
-        $this->_ParameterBag->remove($key);
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function all(): array
-    {
-        return $this->_ParameterBag->all();
-    }
-
 }

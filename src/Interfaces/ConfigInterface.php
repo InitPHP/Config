@@ -1,55 +1,77 @@
 <?php
+
 /**
- * ConfigInterface.php
+ * This file is part of the initphp/config package.
  *
- * This file is part of InitPHP.
+ * (c) Muhammet ŞAFAK <info@muhammetsafak.com.tr>
  *
- * @author     Muhammet ŞAFAK <info@muhammetsafak.com.tr>
- * @copyright  Copyright © 2022 InitPHP
- * @license    http://initphp.github.io/license.txt  MIT
- * @version    1.0
- * @link       https://www.muhammetsafak.com.tr
+ * For the full copyright and license information, please view the
+ * LICENSE file that was distributed with this source code.
+ *
+ * @link https://github.com/InitPHP/Config
  */
 
 declare(strict_types=1);
 
 namespace InitPHP\Config\Interfaces;
 
+/**
+ * The minimal contract every configuration store in this package
+ * fulfils, regardless of where its data originates (a subclass's
+ * properties, an imported array, a PHP file, or a directory of files).
+ *
+ * Keys may use dotted-path notation (e.g. `database.user`) to address a
+ * value nested inside the configuration tree.
+ */
 interface ConfigInterface
 {
     /**
-     * Sets the value of the specified configuration.
+     * Assign a value to a configuration key.
      *
-     * @param string $key Configuration key.
-     * @param mixed $value The new value of the configuration.
-     * @return ConfigInterface
+     * When the key uses dotted-path notation the intermediate arrays
+     * are created on demand.
+     *
+     * @param string $key   The configuration key (dotted paths allowed).
+     * @param mixed  $value The value to store.
+     *
+     * @return static The same instance, for fluent chaining.
      */
-    public function set(string $key, $value): ConfigInterface;
+    public function set(string $key, $value): self;
 
     /**
-     * Returns the value of the specified configuration. If the configuration exists, $default_value is returned.
+     * Return the value stored under a configuration key.
      *
-     * @param string $key The key to the desired configuration. If `NULL` it returns the entire configuration array.
-     * @param mixed $default The data to return if the desired configuration is not found.
-     * @return mixed The value of the configuration or `$default`
+     * @param string $key     The configuration key (dotted paths allowed).
+     * @param mixed  $default The value returned when the key is absent.
+     *
+     * @return mixed The stored value, or $default when the key is absent.
      */
     public function get(string $key, $default = null);
 
     /**
-     * @param string $key
-     * @return bool
+     * Tell whether a configuration key exists.
+     *
+     * A key whose stored value is `null` is still considered present.
+     *
+     * @param string $key The configuration key (dotted paths allowed).
      */
     public function has(string $key): bool;
 
     /**
-     * @param string $key
-     * @return ConfigInterface
+     * Remove a configuration key.
+     *
+     * Removing an absent key is a no-op.
+     *
+     * @param string $key The configuration key (dotted paths allowed).
+     *
+     * @return static The same instance, for fluent chaining.
      */
-    public function remove(string $key): ConfigInterface;
+    public function remove(string $key): self;
 
     /**
-     * @return array
+     * Return the entire configuration tree as a plain array.
+     *
+     * @return array<array-key, mixed>
      */
     public function all(): array;
-
 }

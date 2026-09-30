@@ -5,6 +5,7 @@ dotted-path access, case-insensitive keys, and loaders for arrays, PHP
 files, whole directories and class/object properties — usable either as
 an injectable object or through a static facade.
 
+[![Designed & Maintained with Tan](https://www.muhammetsafak.com.tr/badges/designed-maintained-with-tan.svg)](https://www.muhammetsafak.com.tr/en/tan/)
 [![CI](https://github.com/InitPHP/Config/actions/workflows/ci.yml/badge.svg)](https://github.com/InitPHP/Config/actions/workflows/ci.yml)
 [![Latest Stable Version](http://poser.pugx.org/initphp/config/v)](https://packagist.org/packages/initphp/config)
 [![Total Downloads](http://poser.pugx.org/initphp/config/downloads)](https://packagist.org/packages/initphp/config)

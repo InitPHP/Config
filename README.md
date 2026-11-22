@@ -238,7 +238,7 @@ try {
 
 ## Documentation
 
-In-depth guides with runnable examples live in [`docs/`](docs/README.md).
+In-depth guides with runnable examples live in [`docs/`](docs/Home.md).
 
 ## Testing
 

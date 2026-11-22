@@ -40,7 +40,7 @@
     "minimum-stability": "stable",
     "require": {
         "php": "^8.2",
-        "initphp/parameterbag": "^2.0"
+        "initphp/parameterbag": "^3.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.5",

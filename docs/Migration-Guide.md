@@ -156,7 +156,7 @@ catch (\InitPHP\Config\Exceptions\ConfigException $e) { /* … */ }
 ## Upgrade checklist
 
 1. Bump your platform to **PHP 8.2+** (2.x runs on 8.1, but 3.0.0 requires 8.2).
-2. `composer require initphp/config:^3.0` (pulls `parameterbag:^2.0`).
+2. `composer require initphp/config:^3.0` (pulls `parameterbag:^3.0`).
 3. Replace any `new Config()` usage with static `Config::` calls.
 4. Audit `setArray(null, …)` / `setFile(null, …)` — they now merge; use
    `replace()` if you wanted replace-all.

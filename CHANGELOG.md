@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING:** Requires `initphp/parameterbag` `^3.0` (was `^2.0`). Projects that
+  depend on `initphp/parameterbag` directly must raise their constraint too.
 - **BREAKING:** Raised the minimum PHP version to 8.2 (`"php": "^8.2"`). The
   CI matrix now covers PHP 8.2, 8.3, 8.4 and 8.5.
 - **BREAKING:** The code style moved to PER-CS, enforced by the shared

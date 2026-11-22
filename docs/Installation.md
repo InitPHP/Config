@@ -6,7 +6,7 @@
 | --- | --- |
 | PHP | `^8.2` (tested on 8.2 – 8.5) |
 | Extensions | None |
-| Runtime dependencies | [`initphp/parameterbag`](https://packagist.org/packages/initphp/parameterbag) `^2.0` |
+| Runtime dependencies | [`initphp/parameterbag`](https://packagist.org/packages/initphp/parameterbag) `^3.0` |
 
 `initphp/parameterbag` is pulled in automatically by Composer. Development
 dependencies (PHPUnit, PHPStan, PHP-CS-Fixer) live under `require-dev` and

@@ -1,9 +1,9 @@
-# The Static Facade
+# The Config Facade
 
-[`InitPHP\Config\Config`](../src/Config.php) is a static facade over a
-single, lazily created, process-wide [`Library`](library.md) instance. It
-lets you register configuration once and read it from anywhere without
-passing an object around.
+`InitPHP\Config\Config` is a static facade over a single, lazily created,
+process-wide [`Library`](The-Library-Object.md) instance. It lets you
+register configuration once and read it from anywhere without passing an
+object around.
 
 ```php
 use InitPHP\Config\Config;
@@ -11,7 +11,7 @@ use InitPHP\Config\Config;
 Config::setArray('site', ['url' => 'http://lvh.me']);
 
 // ...elsewhere in the request, no wiring required:
-Config::get('site.url'); // "http://lvh.me"
+Config::get('site.url'); // 'http://lvh.me'
 ```
 
 ## Available calls
@@ -21,7 +21,7 @@ instance:
 
 ```php
 Config::set('app.name', 'InitPHP');
-Config::get('app.name');                 // "InitPHP"
+Config::get('app.name');                 // 'InitPHP'
 Config::has('app.name');                 // true
 Config::remove('app.name');
 Config::all();
@@ -32,8 +32,12 @@ Config::setDir('app', __DIR__ . '/config');
 Config::setClass(\App\Config\Database::class);
 Config::replace(['fresh' => 'tree']);
 
-Config::version(); // "2.0.0"
+Config::version(); // '2.0.0'
 ```
+
+The calls are forwarded through `__callStatic`, so the
+[`@method`](API-Reference.md#config) annotations on the class give your IDE
+full autocompletion.
 
 ## Fluent calls return the Library
 
@@ -51,9 +55,9 @@ $library->get('a');          // 1
 
 ## Resetting between runs
 
-Because the instance is process-wide, long-running workers and especially
-**tests** need a way to start clean. `Config::reset()` discards the shared
-instance; the next call creates a fresh, empty one.
+Because the instance is process-wide, long-running workers — and
+especially **tests** — need a way to start clean. `Config::reset()`
+discards the shared instance; the next call creates a fresh, empty one.
 
 ```php
 final class SomeTest extends \PHPUnit\Framework\TestCase
@@ -71,14 +75,28 @@ final class SomeTest extends \PHPUnit\Framework\TestCase
 }
 ```
 
+Calling `reset()` when no instance exists yet is safe — it is a no-op.
+
+## The facade cannot be instantiated
+
+`Config` is a pure static utility: its constructor is `private`, so
+`new Config()` throws an `Error`. Use the static methods, or inject
+a [`Library`](The-Library-Object.md) when you want an object.
+
 ## Facade or object?
 
-| Use the facade when… | Use a `Library` when… |
+| Use the facade when… | Use a [`Library`](The-Library-Object.md) when… |
 | --- | --- |
 | You want zero wiring and global reach. | You practice dependency injection. |
 | Configuration is truly process-global. | You need isolated instances (e.g. multi-tenant). |
 | Convenience outweighs testability concerns. | You want easy, reset-free test isolation. |
 
 The facade is a convenience layer — under the hood it is the exact same
-[`Library`](library.md), so behaviour (dotted paths, case-insensitivity,
-exceptions) is identical.
+[`Library`](The-Library-Object.md), so behaviour (dotted paths,
+case-insensitivity, exceptions) is identical.
+
+## Related reading
+
+- [The Library Object](The-Library-Object.md) — the instance behind the facade.
+- [Loaders](Loaders.md) — the loader methods exposed through the facade.
+- [API Reference](API-Reference.md#config) — the facade's method map.

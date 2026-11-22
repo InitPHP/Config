@@ -19,7 +19,7 @@ final class ExceptionTest extends TestCase
     {
         $this->assertSame(
             'Configuration file "/a/b.php" was not found.',
-            ConfigException::fileNotFound('/a/b.php')->getMessage()
+            ConfigException::fileNotFound('/a/b.php')->getMessage(),
         );
     }
 
@@ -27,7 +27,7 @@ final class ExceptionTest extends TestCase
     {
         $this->assertSame(
             'Configuration file "/a/b.php" must return an array.',
-            ConfigException::fileMustReturnArray('/a/b.php')->getMessage()
+            ConfigException::fileMustReturnArray('/a/b.php')->getMessage(),
         );
     }
 
@@ -35,7 +35,7 @@ final class ExceptionTest extends TestCase
     {
         $this->assertSame(
             'Configuration file "/a/b.txt" must have a ".php" extension.',
-            ConfigException::notAPhpFile('/a/b.txt')->getMessage()
+            ConfigException::notAPhpFile('/a/b.txt')->getMessage(),
         );
     }
 
@@ -43,7 +43,7 @@ final class ExceptionTest extends TestCase
     {
         $this->assertSame(
             '"/a/b" is not a valid directory.',
-            ConfigException::notADirectory('/a/b')->getMessage()
+            ConfigException::notADirectory('/a/b')->getMessage(),
         );
     }
 
@@ -51,7 +51,7 @@ final class ExceptionTest extends TestCase
     {
         $this->assertSame(
             'Could not read the directory "/a/b".',
-            ConfigException::directoryNotReadable('/a/b')->getMessage()
+            ConfigException::directoryNotReadable('/a/b')->getMessage(),
         );
     }
 
@@ -59,7 +59,7 @@ final class ExceptionTest extends TestCase
     {
         $this->assertSame(
             'Class "App\\Foo" was not found.',
-            ConfigException::classNotFound('App\\Foo')->getMessage()
+            ConfigException::classNotFound('App\\Foo')->getMessage(),
         );
     }
 }

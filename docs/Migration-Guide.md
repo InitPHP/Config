@@ -9,7 +9,7 @@ name.
 
 ## TL;DR
 
-- **PHP 8.1+** is now required (was 7.4+). The release after 2.0.0 raises the minimum again, to PHP 8.2.
+- **PHP 8.1+** is now required (was 7.4+). Version 3.0.0 raises the minimum again, to PHP 8.2.
 - **`initphp/parameterbag` `^2.0`** is now required (was `^1.0`).
 - **Case-insensitive keys still work** — the package opts into them
   internally, so reads/writes that worked in v1 keep working.
@@ -21,7 +21,7 @@ name.
 
 | | v1 | v2 |
 | --- | --- | --- |
-| PHP | `>=7.4` | `^8.1` (`^8.2` from the release after 2.0.0) |
+| PHP | `>=7.4` | `^8.1` (`^8.2` from 3.0.0) |
 | `initphp/parameterbag` | `^1.0` | `^2.0` |
 
 ParameterBag v2 made keys case-sensitive by default. To preserve the
@@ -155,8 +155,8 @@ catch (\InitPHP\Config\Exceptions\ConfigException $e) { /* … */ }
 
 ## Upgrade checklist
 
-1. Bump your platform to **PHP 8.2+** (2.0.0 itself runs on 8.1, but the current code requires 8.2).
-2. `composer require initphp/config:^2.0` (pulls `parameterbag:^2.0`).
+1. Bump your platform to **PHP 8.2+** (2.x runs on 8.1, but 3.0.0 requires 8.2).
+2. `composer require initphp/config:^3.0` (pulls `parameterbag:^2.0`).
 3. Replace any `new Config()` usage with static `Config::` calls.
 4. Audit `setArray(null, …)` / `setFile(null, …)` — they now merge; use
    `replace()` if you wanted replace-all.

@@ -14,7 +14,7 @@ an injectable object or through a static facade.
 
 ## Requirements
 
-- PHP 8.1 or higher
+- PHP 8.2 or higher
 - [initphp/parameterbag](https://github.com/InitPHP/ParameterBag) `^2.0`
 
 ## Installation

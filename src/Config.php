@@ -55,9 +55,7 @@ final class Config
     /**
      * The facade is a pure static utility and must not be instantiated.
      */
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     /**
      * Forward every static call to the shared {@see Library} instance.

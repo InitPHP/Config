@@ -4,7 +4,7 @@
 
 | | |
 | --- | --- |
-| PHP | `^8.2` (tested on 8.2 – 8.5) |
+| PHP | `^8.2` (tested on 8.2 – 8.6) |
 | Extensions | None |
 | Runtime dependencies | [`initphp/parameterbag`](https://packagist.org/packages/initphp/parameterbag) `^3.0` |
 
@@ -56,6 +56,7 @@ Every PR runs the test matrix against:
 - PHP 8.3
 - PHP 8.4
 - PHP 8.5
+- PHP 8.6
 
 The pipeline also runs static analysis (PHPStan, level 8) and a coding
 standard check (PHP-CS-Fixer). If you discover a regression on a

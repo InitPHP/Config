@@ -71,7 +71,7 @@ Config::get('APP.DB.HOST');            // 'localhost' (case-insensitive)
 ## Package metadata
 
 - **License**: MIT
-- **Minimum PHP**: 8.2 (tested on 8.2 – 8.5)
+- **Minimum PHP**: 8.2 (tested on 8.2 – 8.6)
 - **Runtime dependencies**: [`initphp/parameterbag`](https://packagist.org/packages/initphp/parameterbag) `^3.0`
 - **Packagist**: [`initphp/config`](https://packagist.org/packages/initphp/config)
 - **Source**: [github.com/InitPHP/Config](https://github.com/InitPHP/Config)
